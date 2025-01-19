@@ -134,4 +134,4 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 CORS_ALLOWED_ORIGINS = ['*']
 
-APPEND_SLASH = False
+""" APPEND_SLASH = False """
