@@ -2,7 +2,6 @@ from django.db import models
 
 class Employee(models.Model):
     name = models.CharField(max_length=100)
-    
     employeeCode = models.CharField(max_length=10)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=10, blank=True, null=True)
