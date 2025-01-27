@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import Employee, PhotoLibrary, AttendanceLog
-from .serializers import EmployeeSerializer, PhotoLibrarySerializer, AttendanceLogSerializer
+from .models import Employee, PhotoLibrary, AttendanceLog, Project
+from .serializers import EmployeeSerializer, PhotoLibrarySerializer, AttendanceLogSerializer, ProjectSerializer
 
 # filepath: /D:/Projects/AttendanceBackend/attendanceApp/views.py
 from rest_framework import viewsets
@@ -19,3 +19,6 @@ class PhotoLibraryViewSet(viewsets.ModelViewSet):
 class AttendanceLogViewSet(viewsets.ModelViewSet):
     queryset = AttendanceLog.objects.all()
     serializer_class = AttendanceLogSerializer
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer

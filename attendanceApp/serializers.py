@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Employee, PhotoLibrary, AttendanceLog
+from .models import Employee, PhotoLibrary, AttendanceLog, Project
 
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,3 +15,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttendanceLog
         fields = ['id', 'employee', 'date', 'time_in', 'time_out', 'status', 'photo', 'location']
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'employees', 'location']
