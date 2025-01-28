@@ -18,4 +18,4 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'employees', 'location']
+        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'client', 'location']
