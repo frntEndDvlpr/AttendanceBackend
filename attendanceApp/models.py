@@ -45,7 +45,7 @@ class Project(models.Model):
     end_date = models.DateField(blank=True, null=True)
     #employees = models.ManyToManyField(Employee,blank=True, null=True)
     client = models.CharField(max_length=100, blank=True, null=True)
-    location = models.JSONField(blank=True, null=True)
+    location = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return self.title
