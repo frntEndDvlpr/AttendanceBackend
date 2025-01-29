@@ -33,7 +33,7 @@ class AttendanceLog(models.Model):
     time_out = models.TimeField()
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, blank=True, null=True)
     photo = models.ImageField(upload_to='images/')
-    location = models.CharField(max_length=100)
+    location = models.JSONField()
 
     def __str__(self):
         return self.employee.name
@@ -45,7 +45,7 @@ class Project(models.Model):
     end_date = models.DateField(blank=True, null=True)
     #employees = models.ManyToManyField(Employee,blank=True, null=True)
     client = models.CharField(max_length=100, blank=True, null=True)
-    location = models.CharField(max_length=100, blank=True, null=True)
+    location = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return self.title
