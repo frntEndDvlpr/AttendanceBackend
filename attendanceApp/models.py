@@ -46,7 +46,7 @@ class Project(models.Model):
     #employees = models.ManyToManyField(Employee,blank=True, null=True)
     client = models.CharField(max_length=100, blank=True, null=True)
     location = models.JSONField(null=True, blank=True)
-    range = models.FloatField(null=True, blank=True)
+    attendanceRange = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return self.title
