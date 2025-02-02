@@ -8,6 +8,7 @@ class Employee(models.Model):
     designation = models.CharField(max_length=100, blank=True, null=True)
     department = models.CharField(max_length=100, blank=True, null=True)
     date_of_joining = models.DateField(blank=True, null=True)
+    projects = models.ManyToManyField('Project', blank=True)
 
     def __str__(self):
         return self.name
@@ -34,6 +35,7 @@ class AttendanceLog(models.Model):
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, blank=True, null=True)
     photo = models.ImageField(upload_to='images/')
     location = models.JSONField()
+    
 
     def __str__(self):
         return self.employee.name
@@ -43,7 +45,6 @@ class Project(models.Model):
     description = models.TextField(blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
-    #employees = models.ManyToManyField(Employee,blank=True, null=True)
     client = models.CharField(max_length=100, blank=True, null=True)
     location = models.JSONField(null=True, blank=True)
     attendanceRange = models.FloatField(null=True, blank=True)

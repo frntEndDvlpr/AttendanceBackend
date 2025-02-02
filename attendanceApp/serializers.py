@@ -4,7 +4,7 @@ from .models import Employee, PhotoLibrary, AttendanceLog, Project
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
-        fields = ['id', 'name', 'employeeCode', 'email', 'phone', 'designation', 'department', 'date_of_joining']
+        fields = ['id', 'name', 'employeeCode', 'email', 'phone', 'designation', 'department', 'projects', 'date_of_joining']
 
 class PhotoLibrarySerializer(serializers.ModelSerializer):
     class Meta:

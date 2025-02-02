@@ -19,6 +19,7 @@ class PhotoLibraryViewSet(viewsets.ModelViewSet):
 class AttendanceLogViewSet(viewsets.ModelViewSet):
     queryset = AttendanceLog.objects.all()
     serializer_class = AttendanceLogSerializer
+    
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
