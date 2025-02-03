@@ -1,10 +1,6 @@
 from rest_framework import serializers
 from .models import Employee, PhotoLibrary, AttendanceLog, Project
 
-class EmployeeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Employee
-        fields = ['id', 'name', 'employeeCode', 'email', 'phone', 'designation', 'department', 'projects', 'date_of_joining']
 
 class PhotoLibrarySerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,4 +14,10 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'client', 'location', 'attendanceRange']
+        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'client', 'attendanceRange', 'location',]
+        
+class EmployeeSerializer(serializers.ModelSerializer):
+    projects=ProjectSerializer(many=True)
+    class Meta:
+        model = Employee
+        fields = ['id', 'name', 'employeeCode', 'email', 'phone', 'designation', 'department', 'projects', 'date_of_joining']
