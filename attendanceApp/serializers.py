@@ -20,8 +20,23 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'start_date', 'end_date', 'client', 'attendanceRange', 'location',]
         
 class EmployeeSerializer(serializers.ModelSerializer):
-    projects=ProjectSerializer(many=True)
+    projects = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(),  # Allow assigning project IDs
+        many=True
+    )
 
     class Meta:
         model = Employee
-        fields = ['id', 'name', 'employeeCode', 'email', 'phone', 'designation', 'department', 'projects', 'date_of_joining']
+        fields = [
+            'id', 'name', 'employeeCode', 'email', 'phone', 
+            'designation', 'department', 'projects', 'date_of_joining'
+        ]
+
+    def to_representation(self, instance):
+        """Modify output to include project titles instead of just IDs."""
+        representation = super().to_representation(instance)
+        representation['projects'] = [
+            {"id": project.id, "title": project.title} for project in instance.projects.all()
+        ]
+        return representation
+
