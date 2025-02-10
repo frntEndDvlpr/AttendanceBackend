@@ -24,12 +24,13 @@ class EmployeeSerializer(serializers.ModelSerializer):
         queryset=Project.objects.all(),  # Allow assigning project IDs
         many=True
     )
+    user_id = serializers.IntegerField()
 
     class Meta:
         model = Employee
         fields = [
-            'id', 'name', 'employeeCode', 'email', 'phone',  'user',
-            'designation', 'department', 'projects', 'date_of_joining'
+            'id', 'name', 'employeeCode', 'email', 'phone',
+            'designation', 'department', 'projects', 'date_of_joining',  'user_id'
         ]
 
     def to_representation(self, instance):
