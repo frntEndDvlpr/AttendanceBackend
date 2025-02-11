@@ -24,7 +24,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
         queryset=Project.objects.all(),  # Allow assigning project IDs
         many=True
     )
-    user_id = serializers.IntegerField()
 
     class Meta:
         model = Employee
