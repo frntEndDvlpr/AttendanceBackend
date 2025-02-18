@@ -36,7 +36,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         """Modify output to include project titles instead of just IDs."""
         representation = super().to_representation(instance)
         representation['projects'] = [
-            {"id": project.id, "title": project.title, 'location': project.location} for project in instance.projects.all()
+            {"id": project.id, "title": project.title, 'range': project.attendanceRange, 'location': project.location} for project in instance.projects.all()
         ]
         return representation
 
