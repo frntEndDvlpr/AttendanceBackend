@@ -30,13 +30,13 @@ class AttendanceLog(models.Model):
         ('public_holiday', 'Public Holiday'),
     ]
 
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    date = models.DateField()
-    time_in = models.TimeField()
-    time_out = models.TimeField()
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    time_in = models.TimeField(blank=True, null=True)
+    time_out = models.TimeField(blank=True, null=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, blank=True, null=True)
-    photo = models.ImageField(upload_to='images/')
-    location = models.JSONField()
+    photo = models.ImageField(upload_to='images/', blank=True, null=True)
+    location = models.JSONField(blank=True, null=True)
     
 
     def __str__(self):
