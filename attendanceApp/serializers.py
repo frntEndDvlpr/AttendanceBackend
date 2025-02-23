@@ -12,7 +12,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AttendanceLog
-        fields = ['id', 'employee', 'date', 'time_in', 'time_out', 'status', 'photo', 'location']
+        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time']
 class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
