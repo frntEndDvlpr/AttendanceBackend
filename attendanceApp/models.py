@@ -38,6 +38,14 @@ class AttendanceLog(models.Model):
     selfie = models.ImageField(upload_to='images/', blank=True, null=True)
     location = models.JSONField(blank=True, null=True)
     att_date_time = models.DateTimeField(blank=True, null=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    time_in = models.TimeField(blank=True, null=True)
+    time_out = models.TimeField(blank=True, null=True)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, blank=True, null=True)
+    photo = models.ImageField(upload_to='images/', blank=True, null=True)
+    location = models.JSONField(blank=True, null=True)
+    
 
     def __str__(self):
         return self.employee.name
