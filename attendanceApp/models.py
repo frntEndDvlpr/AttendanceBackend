@@ -16,7 +16,7 @@ class Employee(models.Model):
         return self.name
 
 class PhotoLibrary(models.Model):
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='standardPhotos/')
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -35,7 +35,7 @@ class AttendanceLog(models.Model):
     #time_in = models.TimeField(blank=True, null=True)
     #time_out = models.TimeField(blank=True, null=True)
     #status = models.CharField(max_length=15, choices=STATUS_CHOICES, blank=True, null=True)
-    selfie = models.ImageField(upload_to='images/', blank=True, null=True)
+    selfie = models.ImageField(upload_to='selfies/', blank=True, null=True)
     location = models.JSONField(blank=True, null=True)
     att_date_time = models.DateTimeField(blank=True, null=True)
     
