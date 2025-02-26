@@ -29,7 +29,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         fields = [
             'id', 'name', 'employeeCode', 'email', 'phone',
-            'designation', 'department', 'date_of_joining',  'user_id', 'projects'
+            'designation', 'department', 'date_of_joining',  'user_id', 'projects', 'photo'
         ]
 
     def to_representation(self, instance):

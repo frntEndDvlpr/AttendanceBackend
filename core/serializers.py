@@ -1,8 +1,11 @@
-from djoser.serializers import UserSerializer as BaseUserSerializer
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from rest_framework import serializers
 
-from attendanceApp.serializers import EmployeeSerializer
+from attendanceApp.models import Employee
 
-class UserSerializer(BaseUserSerializer):
-    employee = EmployeeSerializer(read_only=True)
-    class Meta (BaseUserSerializer.Meta):
-        fields = ['id', 'username','email','employee']
+
+class UserCreateSerializer(BaseUserCreateSerializer):
+    employee = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False)
+
+    class Meta (BaseUserCreateSerializer.Meta):
+        fields = ['id', 'username','email', 'password', 'employee']
