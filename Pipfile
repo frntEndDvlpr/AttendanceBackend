@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 djoser = "*"
 djangorestframework-simplejwt = {extras = ["crypto"], version = "*"}
+django-debug-toolbar = "*"
+django = "*"
 
 [dev-packages]
 
