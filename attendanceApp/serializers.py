@@ -6,36 +6,6 @@ import base64
 from PIL import Image
 import io
 
-def encode_face(image):
-    # Resize the image to a smaller size for faster processing
-    pil_image = Image.fromarray(image)
-    pil_image = pil_image.resize((500, 500))
-    image = np.array(pil_image)
-
-    # Encode the face in the image
-    face_encodings = face_recognition.face_encodings(image)
-    if face_encodings:
-        return face_encodings[0]
-    return None
-
-def load_and_process_image(image_file):
-    # Load the image file
-    image = Image.open(image_file)
-    print("Image loaded successfully")
-
-    # Convert the image to RGB if it is not already in that format
-    if image.mode != 'RGB':
-        image = image.convert('RGB')
-        print("Image converted to RGB")
-
-    # Resize the image to a smaller size for faster processing
-    image = image.resize((500, 500))
-    print("Image resized successfully")
-
-    # Convert the image to a numpy array
-    image = np.array(image)
-    return image
-
 class PhotoLibrarySerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -48,11 +18,46 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
         model = AttendanceLog
         fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time']
 
+    @staticmethod
+    def load_and_process_image(image_file):
+        # Load the image file
+        image = Image.open(image_file)
+        print("Image loaded successfully")
+
+        # Convert the image to RGB if it is not already in that format
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+            print("Image converted to RGB")
+
+        # Resize the image to a smaller size for faster processing
+        image = image.resize((500, 500))
+        print("Image resized successfully")
+
+        # Convert the image to a numpy array
+        image = np.array(image)
+        print(f"Image shape: {image.shape}")
+        return image
+
+    @staticmethod
+    def encode_face(image):
+        # Resize the image to a smaller size for faster processing
+        pil_image = Image.fromarray(image)
+        pil_image = pil_image.resize((500, 500))
+        image = np.array(pil_image)
+        print(f"Resized image shape: {image.shape}")
+
+        # Encode the face in the image
+        face_encodings = face_recognition.face_encodings(image)
+        print(f"Number of face encodings found: {len(face_encodings)}")
+        if face_encodings:
+            return face_encodings[0]
+        return None
+
     def create(self, validated_data):
         selfie = validated_data.get('selfie')
         if selfie:
             # Load and process the selfie image file
-            selfie_image = load_and_process_image(selfie)
+            selfie_image = self.load_and_process_image(selfie)
             print("Selfie image loaded and processed successfully")
 
             # Save the loaded image for verification
@@ -61,7 +66,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
             print("Selfie image saved for verification")
 
             # Encode the face in the selfie
-            selfie_encoding = encode_face(selfie_image)
+            selfie_encoding = self.encode_face(selfie_image)
             if selfie_encoding is not None:
                 print("Face encoding found in selfie")
 
@@ -102,6 +107,41 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'designation', 'department', 'date_of_joining',  'user_id', 'projects', 'photo', 'photo_encoding'
         ]
 
+    @staticmethod
+    def load_and_process_image(image_file):
+        # Load the image file
+        image = Image.open(image_file)
+        print("Image loaded successfully")
+
+        # Convert the image to RGB if it is not already in that format
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+            print("Image converted to RGB")
+
+        # Resize the image to a smaller size for faster processing
+        image = image.resize((500, 500))
+        print("Image resized successfully")
+
+        # Convert the image to a numpy array
+        image = np.array(image)
+        print(f"Image shape: {image.shape}")
+        return image
+
+    @staticmethod
+    def encode_face(image):
+        # Resize the image to a smaller size for faster processing
+        pil_image = Image.fromarray(image)
+        pil_image = pil_image.resize((500, 500))
+        image = np.array(pil_image)
+        print(f"Resized image shape: {image.shape}")
+
+        # Encode the face in the image
+        face_encodings = face_recognition.face_encodings(image)
+        print(f"Number of face encodings found: {len(face_encodings)}")
+        if face_encodings:
+            return face_encodings[0]
+        return None
+
     def to_representation(self, instance):
         """Modify output to include project titles instead of just IDs."""
         representation = super().to_representation(instance)
@@ -114,11 +154,11 @@ class EmployeeSerializer(serializers.ModelSerializer):
         photo = validated_data.get('photo')
         if photo:
             # Load and process the photo image file
-            photo_image = load_and_process_image(photo)
+            photo_image = self.load_and_process_image(photo)
             print("Employee photo loaded and processed successfully")
 
             # Encode the face in the photo
-            photo_encoding = encode_face(photo_image)
+            photo_encoding = self.encode_face(photo_image)
             if photo_encoding is not None:
                 # Convert the encoding to a base64 string
                 encoding_str = base64.b64encode(np.array(photo_encoding)).decode('utf-8')
@@ -133,11 +173,11 @@ class EmployeeSerializer(serializers.ModelSerializer):
         photo = validated_data.get('photo')
         if photo:
             # Load and process the photo image file
-            photo_image = load_and_process_image(photo)
+            photo_image = self.load_and_process_image(photo)
             print("Employee photo loaded and processed successfully")
 
             # Encode the face in the photo
-            photo_encoding = encode_face(photo_image)
+            photo_encoding = self.encode_face(photo_image)
             if photo_encoding is not None:
                 # Convert the encoding to a base64 string
                 encoding_str = base64.b64encode(np.array(photo_encoding)).decode('utf-8')
