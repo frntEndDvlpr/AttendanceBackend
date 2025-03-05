@@ -160,8 +160,8 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }
 
-DJOSER={
-    'SERIALIZERS':{
+DJOSER = {
+    'SERIALIZERS': {
         'user_create': 'core.serializers.UserCreateSerializer',
     }
 }

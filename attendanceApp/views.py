@@ -10,6 +10,7 @@ from rest_framework import viewsets
 from .models import Employee
 from .serializers import EmployeeSerializer
 
+
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
@@ -20,14 +21,17 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         serializer = EmployeeSerializer(employee)
         return Response(serializer.data)
 
+
 class PhotoLibraryViewSet(viewsets.ModelViewSet):
     queryset = PhotoLibrary.objects.all()
     serializer_class = PhotoLibrarySerializer
 
+
 class AttendanceLogViewSet(viewsets.ModelViewSet):
     queryset = AttendanceLog.objects.all()
     serializer_class = AttendanceLogSerializer
-    
+
+
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer

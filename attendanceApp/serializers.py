@@ -6,11 +6,13 @@ import base64
 from PIL import Image
 import io
 
+
 class PhotoLibrarySerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = PhotoLibrary
         fields = ['id', 'image', 'employee']
+
 
 class AttendanceLogSerializer(serializers.ModelSerializer):
 
@@ -71,10 +73,13 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
                 print("Face encoding found in selfie")
 
                 # Compare the selfie encoding with all employee photo encodings
-                employees = Employee.objects.exclude(photo_encoding__isnull=True)
+                employees = Employee.objects.exclude(
+                    photo_encoding__isnull=True)
                 for employee in employees:
-                    employee_encoding = np.frombuffer(base64.b64decode(employee.photo_encoding), dtype=np.float64)
-                    matches = face_recognition.compare_faces([employee_encoding], selfie_encoding)
+                    employee_encoding = np.frombuffer(base64.b64decode(
+                        employee.photo_encoding), dtype=np.float64)
+                    matches = face_recognition.compare_faces(
+                        [employee_encoding], selfie_encoding)
                     if matches[0]:
                         print(f"Match found: {employee.name}")
                         validated_data['employee_id'] = employee
@@ -85,15 +90,18 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
                 print("No face encodings found in selfie")
         else:
             print("No selfie provided")
-        
+
         return super().create(validated_data)
+
 
 class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'title', 'description', 'start_date', 'end_date', 'client', 'attendanceRange', 'location',]
-        
+        fields = ['id', 'title', 'description', 'start_date',
+                  'end_date', 'client', 'attendanceRange', 'location',]
+
+
 class EmployeeSerializer(serializers.ModelSerializer):
     projects = serializers.PrimaryKeyRelatedField(
         queryset=Project.objects.all(),  # Allow assigning project IDs
@@ -161,12 +169,13 @@ class EmployeeSerializer(serializers.ModelSerializer):
             photo_encoding = self.encode_face(photo_image)
             if photo_encoding is not None:
                 # Convert the encoding to a base64 string
-                encoding_str = base64.b64encode(np.array(photo_encoding)).decode('utf-8')
+                encoding_str = base64.b64encode(
+                    np.array(photo_encoding)).decode('utf-8')
                 validated_data['photo_encoding'] = encoding_str
                 print("Employee photo encoding saved")
             else:
                 print("No face encodings found in employee photo")
-        
+
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -180,10 +189,11 @@ class EmployeeSerializer(serializers.ModelSerializer):
             photo_encoding = self.encode_face(photo_image)
             if photo_encoding is not None:
                 # Convert the encoding to a base64 string
-                encoding_str = base64.b64encode(np.array(photo_encoding)).decode('utf-8')
+                encoding_str = base64.b64encode(
+                    np.array(photo_encoding)).decode('utf-8')
                 validated_data['photo_encoding'] = encoding_str
                 print("Employee photo encoding saved")
             else:
                 print("No face encodings found in employee photo")
-        
+
         return super().update(instance, validated_data)
