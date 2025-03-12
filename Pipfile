@@ -8,6 +8,10 @@ djoser = "*"
 djangorestframework-simplejwt = {extras = ["crypto"], version = "*"}
 django-debug-toolbar = "*"
 django = "*"
+psycopg2 = "*"
+markdown = "*"
+face-recognition = "*"
+setuptools = "*"
 
 [dev-packages]
 

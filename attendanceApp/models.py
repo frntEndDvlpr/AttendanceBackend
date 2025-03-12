@@ -1,3 +1,4 @@
+import face_recognition
 from django.conf import settings
 from django.db import models
 
@@ -16,6 +17,14 @@ class Employee(models.Model):
     photo = models.ImageField(
         upload_to='standardPhotos/', blank=True, null=True)
     photo_encoding = models.TextField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.photo:
+            image = face_recognition.load_image_file(self.photo.path)
+            encodings = face_recognition.face_encodings(image)
+            if encodings:
+                self.photo_encoding = encodings[0].tolist()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -39,10 +48,6 @@ class AttendanceLog(models.Model):
 
     employee_id = models.ForeignKey(
         Employee, on_delete=models.CASCADE, blank=True, null=True)
-    # date = models.DateField(blank=True, null=True)
-    # time_in = models.TimeField(blank=True, null=True)
-    # time_out = models.TimeField(blank=True, null=True)
-    # status = models.CharField(max_length=15, choices=STATUS_CHOICES, blank=True, null=True)
     selfie = models.ImageField(upload_to='selfies/', blank=True, null=True)
     location = models.JSONField(blank=True, null=True)
     att_date_time = models.DateTimeField(blank=True, null=True)
