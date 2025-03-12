@@ -17,7 +17,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AttendanceLog
-        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time']
+        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time', 'date', 'time']
 
     @staticmethod
     def load_and_process_image(image_file):
@@ -57,6 +57,13 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         selfie = validated_data.get('selfie')
         if selfie:
+
+            att_date_time = validated_data.get('att_date_time')
+            if att_date_time:
+                # Extract date and time from att_date_time
+                validated_data['date'] = att_date_time.date()
+                validated_data['time'] = att_date_time.time()
+
             # Load and process the selfie image file
             selfie_image = self.load_and_process_image(selfie)
             print("Selfie image loaded and processed successfully")
@@ -91,6 +98,16 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
             print("No selfie provided")
 
         return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        att_date_time = validated_data.get('att_date_time')
+
+        if att_date_time:
+            # Extract date and time from att_date_time
+            instance.date = att_date_time.date()
+            instance.time = att_date_time.time()
+
+        return super().update(instance, validated_data)
 
 
 class ProjectSerializer(serializers.ModelSerializer):
