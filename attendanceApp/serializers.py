@@ -17,7 +17,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AttendanceLog
-        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time', 'date', 'time']
+        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time', 'date', 'time_in']
 
     @staticmethod
     def load_and_process_image(image_file):
@@ -62,7 +62,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
             if att_date_time:
                 # Extract date and time from att_date_time
                 validated_data['date'] = att_date_time.date()
-                validated_data['time'] = att_date_time.time()
+                validated_data['time_in'] = att_date_time.time()
 
             # Load and process the selfie image file
             selfie_image = self.load_and_process_image(selfie)
@@ -105,7 +105,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
         if att_date_time:
             # Extract date and time from att_date_time
             instance.date = att_date_time.date()
-            instance.time = att_date_time.time()
+            instance.time_in = att_date_time.time()
 
         return super().update(instance, validated_data)
 

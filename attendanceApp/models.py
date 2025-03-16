@@ -49,10 +49,10 @@ class AttendanceLog(models.Model):
     employee_id = models.ForeignKey(
         Employee, on_delete=models.CASCADE, blank=True, null=True)
     selfie = models.ImageField(upload_to='selfies/', blank=True, null=True)
-    location = models.JSONField(blank=True, null=True)
+    location = models.CharField(blank=True, null=True)
     att_date_time = models.DateTimeField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)
-    time = models.TimeField(blank=True, null=True)
+    time_in = models.TimeField(blank=True, null=True)
 
     def __str__(self):
         return self.employee.name
