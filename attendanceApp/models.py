@@ -53,6 +53,9 @@ class AttendanceLog(models.Model):
     att_date_time = models.DateTimeField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)
     time_in = models.TimeField(blank=True, null=True)
+    time_out = models.TimeField(blank=True, null=True)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="Present", blank=True, null=True)
 
     def __str__(self):
         return self.employee.name

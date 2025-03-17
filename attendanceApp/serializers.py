@@ -17,7 +17,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AttendanceLog
-        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time', 'date', 'time_in']
+        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time', 'date', 'time_in', 'time_out', 'status']
 
     @staticmethod
     def load_and_process_image(image_file):
