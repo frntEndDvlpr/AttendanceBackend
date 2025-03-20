@@ -17,6 +17,8 @@ class Employee(models.Model):
     photo = models.ImageField(
         upload_to='standardPhotos/', blank=True, null=True)
     photo_encoding = models.TextField(blank=True, null=True)
+    work_shift = models.ForeignKey(
+        'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='employees')
 
     def save(self, *args, **kwargs):
         if self.photo:
@@ -56,6 +58,8 @@ class AttendanceLog(models.Model):
     time_out = models.TimeField(blank=True, null=True)
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="Present", blank=True, null=True)
+    shift = models.ForeignKey(
+        'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='attendance_logs')
 
     def __str__(self):
         return self.employee.name
@@ -72,3 +76,13 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class WorkShift(models.Model):
+    name = models.CharField(max_length=100)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name

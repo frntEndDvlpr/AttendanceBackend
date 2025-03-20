@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Employee, PhotoLibrary, AttendanceLog, Project
+from .models import Employee, PhotoLibrary, AttendanceLog, Project, WorkShift
 import face_recognition
 import numpy as np
 import base64
@@ -13,11 +13,18 @@ class PhotoLibrarySerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'employee']
 
 
+class WorkShiftSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkShift
+        fields = ['id', 'name', 'start_time', 'end_time', 'description']
+
+
 class AttendanceLogSerializer(serializers.ModelSerializer):
+    #shift = WorkShiftSerializer(read_only=True)
 
     class Meta:
         model = AttendanceLog
-        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time', 'date', 'time_in', 'time_out', 'status']
+        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time', 'date', 'time_in', 'time_out', 'status', 'shift']
 
     @staticmethod
     def load_and_process_image(image_file):
@@ -123,12 +130,13 @@ class EmployeeSerializer(serializers.ModelSerializer):
         queryset=Project.objects.all(),  # Allow assigning project IDs
         many=True
     )
+    #work_shift = WorkShiftSerializer()
 
     class Meta:
         model = Employee
         fields = [
             'id', 'name', 'employeeCode', 'email', 'phone',
-            'designation', 'department', 'date_of_joining',  'user_id', 'projects', 'photo', 'photo_encoding'
+            'designation', 'department', 'date_of_joining',  'user_id', 'projects', 'photo', 'photo_encoding', 'work_shift'
         ]
 
     @staticmethod
