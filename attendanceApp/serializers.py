@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Employee, PhotoLibrary, AttendanceLog, Project, WorkShift
+from .utils import encode_face_from_image_file
 import face_recognition
 import numpy as np
 import base64
@@ -20,11 +21,12 @@ class WorkShiftSerializer(serializers.ModelSerializer):
 
 
 class AttendanceLogSerializer(serializers.ModelSerializer):
-    #shift = WorkShiftSerializer(read_only=True)
+    # shift = WorkShiftSerializer(read_only=True)
 
     class Meta:
         model = AttendanceLog
-        fields = ['id', 'employee_id', 'selfie', 'location', 'att_date_time', 'date', 'time_in', 'time_out', 'status', 'shift']
+        fields = ['id', 'employee_id', 'selfie', 'location',
+                  'att_date_time', 'date', 'time_in', 'time_out', 'status', 'shift']
 
     @staticmethod
     def load_and_process_image(image_file):
@@ -105,7 +107,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
             print("No selfie provided")
 
         return super().create(validated_data)
-    
+
     def update(self, instance, validated_data):
         att_date_time = validated_data.get('att_date_time')
 
@@ -127,97 +129,41 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class EmployeeSerializer(serializers.ModelSerializer):
     projects = serializers.PrimaryKeyRelatedField(
-        queryset=Project.objects.all(),  # Allow assigning project IDs
-        many=True
-    )
-    #work_shift = WorkShiftSerializer()
+        queryset=Project.objects.all(), many=True)
 
     class Meta:
         model = Employee
         fields = [
             'id', 'name', 'employeeCode', 'email', 'phone',
-            'designation', 'department', 'date_of_joining',  'user_id', 'projects', 'photo', 'photo_encoding', 'work_shift'
+            'designation', 'department', 'date_of_joining', 'user_id',
+            'projects', 'photo', 'photo_encoding', 'work_shift'
         ]
-
-    @staticmethod
-    def load_and_process_image(image_file):
-        # Load the image file
-        image = Image.open(image_file)
-        print("Image loaded successfully")
-
-        # Convert the image to RGB if it is not already in that format
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-            print("Image converted to RGB")
-
-        # Resize the image to a smaller size for faster processing
-        image = image.resize((500, 500))
-        print("Image resized successfully")
-
-        # Convert the image to a numpy array
-        image = np.array(image)
-        print(f"Image shape: {image.shape}")
-        return image
-
-    @staticmethod
-    def encode_face(image):
-        # Resize the image to a smaller size for faster processing
-        pil_image = Image.fromarray(image)
-        pil_image = pil_image.resize((500, 500))
-        image = np.array(pil_image)
-        print(f"Resized image shape: {image.shape}")
-
-        # Encode the face in the image
-        face_encodings = face_recognition.face_encodings(image)
-        print(f"Number of face encodings found: {len(face_encodings)}")
-        if face_encodings:
-            return face_encodings[0]
-        return None
 
     def to_representation(self, instance):
-        """Modify output to include project titles instead of just IDs."""
-        representation = super().to_representation(instance)
-        representation['projects'] = [
-            {"id": project.id, "title": project.title, 'range': project.attendanceRange, 'location': project.location} for project in instance.projects.all()
+        """
+        Convert the instance to a dictionary representation,
+        including project details.
+        """
+        data = super().to_representation(instance)
+        data['projects'] = [
+            {"id": project.id, "title": project.title,
+             "range": project.attendanceRange, "location": project.location}
+            for project in instance.projects.all()
         ]
-        return representation
+        return data
 
     def create(self, validated_data):
         photo = validated_data.get('photo')
         if photo:
-            # Load and process the photo image file
-            photo_image = self.load_and_process_image(photo)
-            print("Employee photo loaded and processed successfully")
-
-            # Encode the face in the photo
-            photo_encoding = self.encode_face(photo_image)
-            if photo_encoding is not None:
-                # Convert the encoding to a base64 string
-                encoding_str = base64.b64encode(
-                    np.array(photo_encoding)).decode('utf-8')
-                validated_data['photo_encoding'] = encoding_str
-                print("Employee photo encoding saved")
-            else:
-                print("No face encodings found in employee photo")
-
+            encoding = encode_face_from_image_file(photo)
+            if encoding:
+                validated_data['photo_encoding'] = encoding
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         photo = validated_data.get('photo')
         if photo:
-            # Load and process the photo image file
-            photo_image = self.load_and_process_image(photo)
-            print("Employee photo loaded and processed successfully")
-
-            # Encode the face in the photo
-            photo_encoding = self.encode_face(photo_image)
-            if photo_encoding is not None:
-                # Convert the encoding to a base64 string
-                encoding_str = base64.b64encode(
-                    np.array(photo_encoding)).decode('utf-8')
-                validated_data['photo_encoding'] = encoding_str
-                print("Employee photo encoding saved")
-            else:
-                print("No face encodings found in employee photo")
-
+            encoding = encode_face_from_image_file(photo)
+            if encoding:
+                validated_data['photo_encoding'] = encoding
         return super().update(instance, validated_data)

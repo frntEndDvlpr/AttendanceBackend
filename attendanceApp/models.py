@@ -1,6 +1,15 @@
 import face_recognition
 from django.conf import settings
 from django.db import models
+from .utils import encode_face_from_image_file
+
+
+# models.py
+
+import base64
+import face_recognition
+from django.conf import settings
+from django.db import models
 
 
 class Employee(models.Model):
@@ -21,11 +30,11 @@ class Employee(models.Model):
         'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='employees')
 
     def save(self, *args, **kwargs):
-        if self.photo:
-            image = face_recognition.load_image_file(self.photo.path)
-            encodings = face_recognition.face_encodings(image)
-            if encodings:
-                self.photo_encoding = encodings[0].tolist()
+        if self.photo and not self.photo_encoding:
+            with self.photo.open('rb') as photo_file:
+                encoding = encode_face_from_image_file(photo_file)
+                if encoding:
+                    self.photo_encoding = encoding
         super().save(*args, **kwargs)
 
     def __str__(self):
