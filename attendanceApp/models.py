@@ -1,13 +1,6 @@
-import face_recognition
 from django.conf import settings
 from django.db import models
 from .utils import encode_face_from_image_file
-
-
-# models.py
-
-import base64
-import face_recognition
 from django.conf import settings
 from django.db import models
 
