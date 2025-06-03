@@ -59,6 +59,7 @@ class AttendanceLog(models.Model):
     date = models.DateField(blank=True, null=True)
     time_in = models.TimeField(blank=True, null=True)
     time_out = models.TimeField(blank=True, null=True)
+    total_hours = models.FloatField(blank=True, null=True)
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="Present", blank=True, null=True)
     shift = models.ForeignKey(

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Employee, PhotoLibrary, AttendanceLog, Project, WorkShift
-from .utils import encode_face_from_image_file, match_employee_by_selfie
+from .import utils
 
 
 class PhotoLibrarySerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttendanceLog
         fields = ['id', 'employee_id', 'selfie', 'location',
-                  'att_date_time', 'date', 'time_in', 'time_out', 'status', 'shift']
+                  'att_date_time', 'date', 'time_in', 'time_out', 'total_hours', 'status', 'shift']
 
         read_only_fields = ['employee_id', 'date',
                             'time_in', 'time_out', 'status']
@@ -33,9 +33,10 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
         validated_data['date'] = att_date_time.date()
 
-        # Find or create today's log for employee if exists
+        # Match face in the selfie to employee
         known_employees = Employee.objects.exclude(photo_encoding__isnull=True)
-        matched_employee = match_employee_by_selfie(selfie, known_employees)
+        matched_employee = utils.match_employee_by_selfie(
+            selfie, known_employees)
 
         if not matched_employee:
             raise serializers.ValidationError(
@@ -60,14 +61,20 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Already punched out for today.")
 
+            attendance_log.location = validated_data.get('location', None)
             attendance_log.time_out = att_date_time.time()
             attendance_log.status = 'Present'
             attendance_log.selfie = selfie  # Optional: save punch-out selfie
+            attendance_log.total_hours = utils.compute_total_hours(
+                attendance_log.time_in,
+                attendance_log.time_out
+            )
             attendance_log.save()
             return attendance_log
 
         # This is a punch-in
-        attendance_log.status = 'pending'
+        attendance_log.location = validated_data.get('location', None)
+        attendance_log.status = ''
         attendance_log.save()
         return attendance_log
 
@@ -108,7 +115,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         photo = validated_data.get('photo')
         if photo:
-            encoding = encode_face_from_image_file(photo)
+            encoding = utils.encode_face_from_image_file(photo)
             if encoding:
                 validated_data['photo_encoding'] = encoding
         return super().create(validated_data)
@@ -116,7 +123,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         photo = validated_data.get('photo')
         if photo:
-            encoding = encode_face_from_image_file(photo)
+            encoding = utils.encode_face_from_image_file(photo)
             if encoding:
                 validated_data['photo_encoding'] = encoding
         return super().update(instance, validated_data)

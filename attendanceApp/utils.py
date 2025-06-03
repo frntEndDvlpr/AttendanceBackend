@@ -2,6 +2,7 @@ import face_recognition
 import numpy as np
 import base64
 from PIL import Image
+from datetime import datetime, timedelta
 
 
 def encode_face_from_image_file(image_file) -> str | None:
@@ -60,3 +61,18 @@ def match_employee_by_selfie(selfie_image_file, known_employees):
     except Exception as e:
         print(f"Error processing selfie: {e}")
     return None
+
+
+def compute_total_hours(time_in, time_out):
+    # Assume same day for now
+    today = datetime.today().date()
+    dt_in = datetime.combine(today, time_in)
+    dt_out = datetime.combine(today, time_out)
+
+    # If time_out is before time_in (e.g., overnight shift), adjust date
+    if dt_out < dt_in:
+        dt_out += timedelta(days=1)
+
+    duration = dt_out - dt_in
+    total_hours = round(duration.total_seconds() / 3600, 2)  # hours as float
+    return total_hours
