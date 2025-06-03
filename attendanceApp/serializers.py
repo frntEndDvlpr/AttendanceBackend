@@ -30,23 +30,26 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         selfie = validated_data.get('selfie')
         att_date_time = validated_data.get('att_date_time')
-
         validated_data['date'] = att_date_time.date()
 
-        # Match face in the selfie to employee
-        known_employees = Employee.objects.exclude(photo_encoding__isnull=True)
-        matched_employee = utils.match_employee_by_selfie(
-            selfie, known_employees)
+        employee = self._match_employee_by_face(selfie)
+        validated_data['employee_id'] = employee
 
-        if not matched_employee:
+        return self._handle_attendance_log(employee, att_date_time, selfie, validated_data)
+
+    def _match_employee_by_face(self, selfie):
+        known_employees = Employee.objects.exclude(photo_encoding__isnull=True)
+        matched = utils.match_employee_by_selfie(selfie, known_employees)
+
+        if not matched:
             raise serializers.ValidationError(
                 "Face not recognized or not found.")
 
-        validated_data['employee_id'] = matched_employee
+        return matched
 
-        # Check if there's already an entry for today
-        attendance_log, created = AttendanceLog.objects.get_or_create(
-            employee_id=matched_employee,
+    def _handle_attendance_log(self, employee, att_date_time, selfie, validated_data):
+        log, created = AttendanceLog.objects.get_or_create(
+            employee_id=employee,
             date=att_date_time.date(),
             defaults={
                 'att_date_time': att_date_time,
@@ -56,27 +59,25 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
         )
 
         if not created:
-            # This is a punch-out
-            if attendance_log.time_out:
+            if log.time_out:
                 raise serializers.ValidationError(
                     "Already punched out for today.")
 
-            attendance_log.location = validated_data.get('location', None)
-            attendance_log.time_out = att_date_time.time()
-            attendance_log.status = 'Present'
-            attendance_log.selfie = selfie  # Optional: save punch-out selfie
-            attendance_log.total_hours = utils.compute_total_hours(
-                attendance_log.time_in,
-                attendance_log.time_out
-            )
-            attendance_log.save()
-            return attendance_log
+            # Punch-out logic
+            log.time_out = att_date_time.time()
+            log.status = 'Present'
+            log.selfie = selfie
+            log.location = validated_data.get('location')
+            log.total_hours = utils.compute_total_hours(
+                log.time_in, log.time_out)
+            log.save()
+            return log
 
-        # This is a punch-in
-        attendance_log.location = validated_data.get('location', None)
-        attendance_log.status = ''
-        attendance_log.save()
-        return attendance_log
+        # Punch-in logic
+        log.location = validated_data.get('location')
+        log.status = ''
+        log.save()
+        return log
 
 
 class ProjectSerializer(serializers.ModelSerializer):
