@@ -1,10 +1,6 @@
 from rest_framework import serializers
 from .models import Employee, PhotoLibrary, AttendanceLog, Project, WorkShift
-from .utils import encode_face_from_image_file
-import face_recognition
-import numpy as np
-import base64
-from PIL import Image
+from .utils import encode_face_from_image_file, match_employee_by_selfie
 
 
 class PhotoLibrarySerializer(serializers.ModelSerializer):
@@ -28,95 +24,52 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
         fields = ['id', 'employee_id', 'selfie', 'location',
                   'att_date_time', 'date', 'time_in', 'time_out', 'status', 'shift']
 
-    @staticmethod
-    def load_and_process_image(image_file):
-        # Load the image file
-        image = Image.open(image_file)
-        print("Image loaded successfully")
-
-        # Convert the image to RGB if it is not already in that format
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-            print("Image converted to RGB")
-
-        # Resize the image to a smaller size for faster processing
-        image = image.resize((500, 500))
-        print("Image resized successfully")
-
-        # Convert the image to a numpy array
-        image = np.array(image)
-        print(f"Image shape: {image.shape}")
-        return image
-
-    @staticmethod
-    def encode_face(image):
-        # Resize the image to a smaller size for faster processing
-        pil_image = Image.fromarray(image)
-        pil_image = pil_image.resize((500, 500))
-        image = np.array(pil_image)
-        print(f"Resized image shape: {image.shape}")
-
-        # Encode the face in the image
-        face_encodings = face_recognition.face_encodings(image)
-        print(f"Number of face encodings found: {len(face_encodings)}")
-        if face_encodings:
-            return face_encodings[0]
-        return None
+        read_only_fields = ['employee_id', 'date',
+                            'time_in', 'time_out', 'status']
 
     def create(self, validated_data):
         selfie = validated_data.get('selfie')
-        if selfie:
-
-            att_date_time = validated_data.get('att_date_time')
-            if att_date_time:
-                # Extract date and time from att_date_time
-                validated_data['date'] = att_date_time.date()
-                validated_data['time_in'] = att_date_time.time()
-
-            # Load and process the selfie image file
-            selfie_image = self.load_and_process_image(selfie)
-            print("Selfie image loaded and processed successfully")
-
-            # Save the loaded image for verification
-            pil_image = Image.fromarray(selfie_image)
-            pil_image.save("loaded_selfie.jpg")
-            print("Selfie image saved for verification")
-
-            # Encode the face in the selfie
-            selfie_encoding = self.encode_face(selfie_image)
-            if selfie_encoding is not None:
-                print("Face encoding found in selfie")
-
-                # Compare the selfie encoding with all employee photo encodings
-                employees = Employee.objects.exclude(
-                    photo_encoding__isnull=True)
-                for employee in employees:
-                    employee_encoding = np.frombuffer(base64.b64decode(
-                        employee.photo_encoding), dtype=np.float64)
-                    matches = face_recognition.compare_faces(
-                        [employee_encoding], selfie_encoding)
-                    if matches[0]:
-                        print(f"Match found: {employee.name}")
-                        validated_data['employee_id'] = employee
-                        break
-                else:
-                    print("No match found")
-            else:
-                print("No face encodings found in selfie")
-        else:
-            print("No selfie provided")
-
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
         att_date_time = validated_data.get('att_date_time')
 
-        if att_date_time:
-            # Extract date and time from att_date_time
-            instance.date = att_date_time.date()
-            instance.time_in = att_date_time.time()
+        validated_data['date'] = att_date_time.date()
 
-        return super().update(instance, validated_data)
+        # Find or create today's log for employee if exists
+        known_employees = Employee.objects.exclude(photo_encoding__isnull=True)
+        matched_employee = match_employee_by_selfie(selfie, known_employees)
+
+        if not matched_employee:
+            raise serializers.ValidationError(
+                "Face not recognized or not found.")
+
+        validated_data['employee_id'] = matched_employee
+
+        # Check if there's already an entry for today
+        attendance_log, created = AttendanceLog.objects.get_or_create(
+            employee_id=matched_employee,
+            date=att_date_time.date(),
+            defaults={
+                'att_date_time': att_date_time,
+                'selfie': selfie,
+                'time_in': att_date_time.time()
+            }
+        )
+
+        if not created:
+            # This is a punch-out
+            if attendance_log.time_out:
+                raise serializers.ValidationError(
+                    "Already punched out for today.")
+
+            attendance_log.time_out = att_date_time.time()
+            attendance_log.status = 'Present'
+            attendance_log.selfie = selfie  # Optional: save punch-out selfie
+            attendance_log.save()
+            return attendance_log
+
+        # This is a punch-in
+        attendance_log.status = 'pending'
+        attendance_log.save()
+        return attendance_log
 
 
 class ProjectSerializer(serializers.ModelSerializer):

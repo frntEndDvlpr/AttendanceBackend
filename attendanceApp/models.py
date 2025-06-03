@@ -44,6 +44,7 @@ class PhotoLibrary(models.Model):
 
 class AttendanceLog(models.Model):
     STATUS_CHOICES = [
+        ('pending', 'Pending'),
         ('present', 'Present'),
         ('absent', 'Absent'),
         ('weekend', 'Weekend'),
