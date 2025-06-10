@@ -1,8 +1,6 @@
 from django.conf import settings
 from django.db import models
 from .utils import encode_face_from_image_file
-from django.conf import settings
-from django.db import models
 
 
 class Employee(models.Model):
@@ -22,13 +20,15 @@ class Employee(models.Model):
     work_shift = models.ForeignKey(
         'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='employees')
 
-    def save(self, *args, **kwargs):
-        if self.photo and not self.photo_encoding:
-            with self.photo.open('rb') as photo_file:
-                encoding = encode_face_from_image_file(photo_file)
-                if encoding:
-                    self.photo_encoding = encoding
-        super().save(*args, **kwargs)
+
+def save(self, *args, **kwargs):
+    if self.photo and not self.photo_encoding:
+        self.photo.seek(0)  # Ensure file pointer is at start
+        with self.photo.file as photo_file:
+            encoding = encode_face_from_image_file(photo_file)
+            if encoding:
+                self.photo_encoding = encoding
+    super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -66,7 +66,7 @@ class AttendanceLog(models.Model):
         'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='attendance_logs')
 
     def __str__(self):
-        return self.employee.name
+        return self.employee_id.name
 
 
 class Project(models.Model):
