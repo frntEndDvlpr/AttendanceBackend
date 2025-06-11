@@ -2,8 +2,9 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from .models import Employee, PhotoLibrary, AttendanceLog, Project, WorkShift
-from .serializers import EmployeeSerializer, PhotoLibrarySerializer, AttendanceLogSerializer, ProjectSerializer, WorkShiftSerializer
+from .models import Employee, AttendanceLog, Project, WorkShift
+from .serializers import EmployeeSerializer, AttendanceLogSerializer, ProjectSerializer, WorkShiftSerializer
+
 
 class WorkShiftViewSet(viewsets.ModelViewSet):
     """
@@ -11,6 +12,7 @@ class WorkShiftViewSet(viewsets.ModelViewSet):
     """
     queryset = WorkShift.objects.all()
     serializer_class = WorkShiftSerializer
+
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     """
@@ -33,9 +35,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         # Custom logic for updating an Employee can be added here
         serializer.save()
 
-class PhotoLibraryViewSet(viewsets.ModelViewSet):
-    queryset = PhotoLibrary.objects.all()
-    serializer_class = PhotoLibrarySerializer
 
 class AttendanceLogViewSet(viewsets.ModelViewSet):
     """
@@ -51,6 +50,7 @@ class AttendanceLogViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         # Custom logic for updating an AttendanceLog can be added here
         serializer.save()
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     """

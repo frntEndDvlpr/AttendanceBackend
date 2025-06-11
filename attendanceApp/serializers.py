@@ -1,13 +1,6 @@
 from rest_framework import serializers
-from .models import Employee, PhotoLibrary, AttendanceLog, Project, WorkShift
+from .models import Employee, AttendanceLog, Project, WorkShift
 from .import utils
-
-
-class PhotoLibrarySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = PhotoLibrary
-        fields = ['id', 'image', 'employee']
 
 
 class WorkShiftSerializer(serializers.ModelSerializer):
@@ -21,10 +14,10 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AttendanceLog
-        fields = ['id', 'employee_id', 'selfie', 'location',
+        fields = ['id', 'employee', 'selfie', 'location',
                   'att_date_time', 'date', 'time_in', 'time_out', 'total_hours', 'status', 'shift']
 
-        read_only_fields = ['employee_id', 'date',
+        read_only_fields = ['employee', 'date',
                             'time_in', 'time_out', 'status']
 
     def create(self, validated_data):
@@ -33,7 +26,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
         validated_data['date'] = att_date_time.date()
 
         employee = self._match_employee_by_face(selfie)
-        validated_data['employee_id'] = employee
+        validated_data['employee'] = employee
 
         return self._handle_attendance_log(employee, att_date_time, selfie, validated_data)
 
@@ -49,7 +42,7 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
     def _handle_attendance_log(self, employee, att_date_time, selfie, validated_data):
         log, created = AttendanceLog.objects.get_or_create(
-            employee_id=employee,
+            employee=employee,
             date=att_date_time.date(),
             defaults={
                 'att_date_time': att_date_time,

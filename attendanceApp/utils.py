@@ -53,7 +53,8 @@ def match_employee_by_selfie(selfie_image_file, known_employees):
                 match = face_recognition.compare_faces(
                     [employee_encoding], selfie_encoding)[0]
                 if match:
-                    print(f"Matched with: {employee.name}")
+                    print(
+                        f"Matched with: {employee.employeeCode, employee.name}")
                     return employee
             except Exception as e:
                 print(f"Error decoding face for employee {employee.id}: {e}")

@@ -20,26 +20,17 @@ class Employee(models.Model):
     work_shift = models.ForeignKey(
         'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='employees')
 
-
-def save(self, *args, **kwargs):
-    if self.photo and not self.photo_encoding:
-        self.photo.seek(0)  # Ensure file pointer is at start
-        with self.photo.file as photo_file:
-            encoding = encode_face_from_image_file(photo_file)
-            if encoding:
-                self.photo_encoding = encoding
-    super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        if self.photo and not self.photo_encoding:
+            self.photo.seek(0)  # Ensure file pointer is at start
+            with self.photo.file as photo_file:
+                encoding = encode_face_from_image_file(photo_file)
+                if encoding:
+                    self.photo_encoding = encoding
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
-
-
-class PhotoLibrary(models.Model):
-    image = models.ImageField(upload_to='standardPhotos/')
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.employee.name
 
 
 class AttendanceLog(models.Model):
@@ -51,7 +42,7 @@ class AttendanceLog(models.Model):
         ('public_holiday', 'Public Holiday'),
     ]
 
-    employee_id = models.ForeignKey(
+    employee = models.ForeignKey(
         Employee, on_delete=models.CASCADE, blank=True, null=True)
     selfie = models.ImageField(upload_to='selfies/', blank=True, null=True)
     location = models.CharField(blank=True, null=True)
@@ -66,7 +57,7 @@ class AttendanceLog(models.Model):
         'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='attendance_logs')
 
     def __str__(self):
-        return self.employee_id.name
+        return str(self.employee.name) if self.employee and hasattr(self.employee, "name") else "AttendanceLog object"
 
 
 class Project(models.Model):
