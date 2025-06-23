@@ -1,3 +1,12 @@
+# Utility functions for face recognition and attendance management
+# These functions handle encoding images, matching faces, and calculating attendance hours.
+# They are designed to work with Django models and image files.
+## Note: Ensure you have the required libraries installed:
+# pip install face_recognition numpy Pillow
+# Also, ensure you have the necessary face_recognition model files available in your environment.
+# Usage of these functions assumes you have a Django model with an ImageField for employee photos
+# and a field to store the base64 encoded face encodings.
+
 import face_recognition
 import numpy as np
 import base64
@@ -20,7 +29,7 @@ def encode_face_from_image_file(image_file) -> str | None:
         encodings = face_recognition.face_encodings(image_array)
         if encodings:
             # Encode as base64 string for storage
-            return base64.b64encode(encodings[0]).decode('utf-8')
+            return base64.b64encode(encodings[0].tobytes()).decode('utf-8')
     except Exception as e:
         print(f"Face encoding error: {e}")
 

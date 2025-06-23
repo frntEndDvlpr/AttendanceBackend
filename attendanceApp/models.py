@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+
+from core.models import User
 from .utils import encode_face_from_image_file
 
 
@@ -81,3 +83,29 @@ class WorkShift(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class CorrectionRequest(models.Model):
+    PUNCH_TYPE_CHOICES = [
+        ('IN', 'Punch In'),
+        ('OUT', 'Punch Out'),
+    ]
+
+    employee = models.ForeignKey(User, on_delete=models.CASCADE)
+    punch_type = models.CharField(max_length=3, choices=PUNCH_TYPE_CHOICES)
+    date = models.DateField()
+    corrected_time = models.TimeField()
+    reason = models.TextField()
+    status = models.CharField(max_length=10, choices=[
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ], default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_corrections')
+    attendance_log = models.ForeignKey(AttendanceLog, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.employee.username} - {self.punch_type} on {self.date}"
+

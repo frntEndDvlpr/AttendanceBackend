@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Employee, AttendanceLog, Project, WorkShift
+from .models import CorrectionRequest, Employee, AttendanceLog, Project, WorkShift
 from .import utils
 
 
@@ -121,3 +121,18 @@ class EmployeeSerializer(serializers.ModelSerializer):
             if encoding:
                 validated_data['photo_encoding'] = encoding
         return super().update(instance, validated_data)
+
+
+class CorrectionRequestSerializer(serializers.ModelSerializer):
+    employee = serializers.ReadOnlyField(source='employee.username')
+
+    class Meta:
+        model = CorrectionRequest
+        fields = [
+            'id', 'attendance_log', 'employee', 'reason', 'status', 'created_at', 'reviewed_at', 'reviewed_by', 'punch_type', 'date', 'corrected_time',
+            ]
+        read_only_fields = ['status', 'created_at', 'reviewed_at', 'reviewed_by', 'attendance_log']
+
+
+class CorrectionReviewSerializer(serializers.Serializer):
+    decision = serializers.ChoiceField(choices=["APPROVED", "REJECTED"])
