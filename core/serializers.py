@@ -11,7 +11,7 @@ class UserCreateSerializer(BaseUserCreateSerializer):
 
 class UserSerializer(BaseUserSerializer):
     employee = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False)
-    is_staff = serializers.BooleanField(read_only=True)  # ✅ Safe and correct
+    is_staff = serializers.BooleanField()
 
     class Meta(BaseUserSerializer.Meta):
         fields = ['id', 'username', 'email', 'is_staff', 'employee']
