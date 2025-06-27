@@ -7,7 +7,7 @@ from .utils import encode_face_from_image_file
 
 class Employee(models.Model):
     name = models.CharField(max_length=100)
-    employeeCode = models.CharField(max_length=10)
+    employeeCode = models.CharField(max_length=10, unique=True)  # Added unique constraint
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     designation = models.CharField(max_length=100, blank=True, null=True)
@@ -15,24 +15,35 @@ class Employee(models.Model):
     date_of_joining = models.DateField(blank=True, null=True)
     projects = models.ManyToManyField('Project', blank=True)
     user_id = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='employee')
-    photo = models.ImageField(
-        upload_to='standardPhotos/', blank=True, null=True)
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='employee'
+    )
+    photo = models.ImageField(upload_to='standardPhotos/', blank=True, null=True)
     photo_encoding = models.TextField(blank=True, null=True)
     work_shift = models.ForeignKey(
-        'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='employees')
+        'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='employees'
+    )
 
     def save(self, *args, **kwargs):
-        if self.photo and not self.photo_encoding:
-            self.photo.seek(0)  # Ensure file pointer is at start
-            with self.photo.file as photo_file:
-                encoding = encode_face_from_image_file(photo_file)
-                if encoding:
-                    self.photo_encoding = encoding
+        # Check if photo has changed or encoding is missing
+        photo_changed = False
+        if self.pk:
+            old = Employee.objects.filter(pk=self.pk).first()
+            if old and old.photo != self.photo:
+                photo_changed = True
+        else:
+            photo_changed = True
+
+        if self.photo and (not self.photo_encoding or self._state.adding or photo_changed):
+            try:
+                encoding = encode_face_from_image_file(self.photo)
+                self.photo_encoding = encoding or None  # Set to None if encoding fails
+            except Exception as e:
+                print(f"Error encoding photo for employee {self.employeeCode}: {e}")
+                self.photo_encoding = None
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.employeeCode})"
 
 
 class AttendanceLog(models.Model):
