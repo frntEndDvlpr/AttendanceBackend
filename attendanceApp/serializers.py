@@ -115,6 +115,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
+        print("🔍 Incoming photo:", validated_data.get('photo'))
         photo = validated_data.get('photo')
         if photo:
             encoding = utils.encode_face_from_image_file(photo)
