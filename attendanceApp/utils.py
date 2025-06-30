@@ -37,40 +37,51 @@ def encode_face_from_image_file(image_file) -> str | None:
 
 
 def match_employee_by_selfie(selfie_image_file, known_employees):
-    """
-    Given a selfie image file and a queryset of employees with stored encodings,
-    return the matching Employee instance or None.
-    """
     try:
-        selfie_image = Image.open(selfie_image_file).convert(
-            'RGB').resize((500, 500))
+        selfie_image = Image.open(selfie_image_file).convert('RGB').resize((500, 500))
         selfie_array = np.array(selfie_image)
         selfie_encodings = face_recognition.face_encodings(selfie_array)
 
         if not selfie_encodings:
-            print("No face found in selfie.")
+            print("❗ No face found in selfie.")
             return None
 
         selfie_encoding = selfie_encodings[0]
 
+        # Define the match threshold
+        threshold = 0.4
+
         for employee in known_employees:
             if not employee.photo_encoding:
+                print(f"⚠️ Skipping employee {employee.employeeCode} ({employee.name}): No encoding available.")
                 continue
+
             try:
-                employee_encoding = np.frombuffer(base64.b64decode(
-                    employee.photo_encoding), dtype=np.float64)
-                match = face_recognition.compare_faces(
-                    [employee_encoding], selfie_encoding)[0]
-                if match:
-                    print(
-                        f"Matched with: {employee.employeeCode, employee.name}")
+                employee_encoding = np.frombuffer(
+                    base64.b64decode(employee.photo_encoding), dtype=np.float64)
+
+                distance = face_recognition.face_distance([employee_encoding], selfie_encoding)[0]
+                is_match = face_recognition.compare_faces(
+                    [employee_encoding], selfie_encoding, tolerance=threshold)[0]
+
+                # Calculate confidence as a percentage
+                confidence = max(0, (1 - distance / threshold)) * 100
+
+                print(f"🔍 {employee.employeeCode} ({employee.name}) → Distance: {distance:.4f} → Confidence: {confidence:.2f}%, Match: {is_match}")
+
+                if is_match:
+                    print(f"✅ Matched with: ({employee.employeeCode}, {employee.name})")
                     return employee
+
             except Exception as e:
-                print(f"Error decoding face for employee {employee.id}: {e}")
+                print(f"❌ Error decoding or comparing face for employee {employee.employeeCode}: {e}")
 
     except Exception as e:
-        print(f"Error processing selfie: {e}")
+        print(f"❌ Error processing selfie: {e}")
+
+    print("🚫 No matching employee found.")
     return None
+
 
 
 def compute_total_hours(time_in, time_out):
