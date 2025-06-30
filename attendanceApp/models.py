@@ -65,7 +65,7 @@ class AttendanceLog(models.Model):
     time_out = models.TimeField(blank=True, null=True)
     total_hours = models.FloatField(blank=True, null=True)
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="Present", blank=True, null=True)
+        max_length=20, choices=STATUS_CHOICES, default="absent", blank=True, null=True)
     shift = models.ForeignKey(
         'WorkShift', on_delete=models.SET_NULL, blank=True, null=True, related_name='attendance_logs')
 
