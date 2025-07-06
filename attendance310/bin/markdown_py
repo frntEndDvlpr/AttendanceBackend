@@ -1,4 +1,4 @@
-#!/home/abbas/Projects/AttendanceBackend/attendance310/bin/python3.10
+#!/home/abbas/Projects/AttendanceBackend/attendance310/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

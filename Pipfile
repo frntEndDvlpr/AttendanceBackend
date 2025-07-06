@@ -12,6 +12,7 @@ psycopg2 = "*"
 markdown = "*"
 face-recognition = "*"
 setuptools = "*"
+gunicorn = "*"
 
 [dev-packages]
 
