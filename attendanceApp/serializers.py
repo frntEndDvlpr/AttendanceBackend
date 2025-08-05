@@ -11,6 +11,7 @@ class WorkShiftSerializer(serializers.ModelSerializer):
 
 class AttendanceLogSerializer(serializers.ModelSerializer):
     # shift = WorkShiftSerializer(read_only=True)
+    employee = serializers.SerializerMethodField()
 
     class Meta:
         model = AttendanceLog
@@ -19,6 +20,14 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
         read_only_fields = ['employee', 'date',
                             'time_in', 'time_out', 'status']
+        
+    def get_employee(self, obj):
+        if obj.employee:
+            return {
+                'id': obj.employee.id,
+                'name': obj.employee.name
+            }
+        return None
 
     def create(self, validated_data):
         selfie = validated_data.get('selfie')
