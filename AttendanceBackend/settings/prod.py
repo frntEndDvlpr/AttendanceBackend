@@ -1,9 +1,10 @@
 import os
+import sys
 import dj_database_url
 from .common import *
 
 
-DEBUG = False
+DEBUG = True
 
 CORS_ALLOW_ALL_ORIGINS = False
 ALLOWED_HOSTS = ['attendance-ksa-247f689c4e51.herokuapp.com']
@@ -33,4 +34,20 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': False,
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
 }
