@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'djoser',
     'markdown',
     'attendanceApp',
@@ -131,6 +132,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
+    'BLACKLIST_AFTER_ROTATION': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
 }
@@ -140,5 +142,8 @@ DJOSER = {
         'user_create': 'core.serializers.UserCreateSerializer',
         'user': 'core.serializers.UserSerializer',
         "current_user": "core.serializers.UserSerializer",
-    }
+    },
+    'PASSWORD_RESET_CONFIRM_URL': None,   # disables email reset confirm
+    'SEND_ACTIVATION_EMAIL': False,
+    'SEND_CONFIRMATION_EMAIL': False,
 }

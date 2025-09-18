@@ -1,11 +1,14 @@
 from django.utils import timezone
 from django.shortcuts import render
+from core.serializers import AdminPasswordResetSerializer
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions, serializers
 from rest_framework.decorators import action
+from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 from .models import CorrectionRequest, Employee, AttendanceLog, Project, WorkShift
 from .serializers import CorrectionRequestSerializer, EmployeeSerializer, AttendanceLogSerializer, ProjectSerializer, WorkShiftSerializer, CorrectionReviewSerializer
 from .utils import compute_total_hours
+
 
 class WorkShiftViewSet(viewsets.ModelViewSet):
     """
@@ -36,6 +39,31 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         # Custom logic for updating an Employee can be added here
         serializer.save()
 
+    @action(
+            detail=True, methods=['get', 'post'],
+            permission_classes=[permissions.IsAdminUser],
+            serializer_class=AdminPasswordResetSerializer
+            )
+    def reset_password(self, request, pk=None):
+        employee = self.get_object()
+        user = employee.user_id
+
+        if request.method == 'GET':
+            # Return empty serializer so DRF renders a browsable API form
+            serializer = AdminPasswordResetSerializer()
+            return Response(serializer.data)
+
+        # POST logic
+        serializer = AdminPasswordResetSerializer(data=request.data, context={'user': user})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        # ✅ Force logout by blacklisting all outstanding tokens
+        tokens = OutstandingToken.objects.filter(user=user)
+        for token in tokens:
+            BlacklistedToken.objects.get_or_create(token=token)
+
+        return Response({"detail": f"Password for {user.username} has been reset and user has been logged out."})
 
 class AttendanceLogViewSet(viewsets.ModelViewSet):
     """
